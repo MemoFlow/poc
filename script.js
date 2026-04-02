@@ -38,7 +38,6 @@ const fetchN8NData = async (group) => {
   console.log(n8nData);
 }
 
-
 createTrelloBoardOptions();
 
 const form = document.getElementById('trelloForm')
@@ -54,7 +53,24 @@ form.addEventListener('submit', async (e) => {
   const [listsResponse, cardsResponse] = await Promise.all([fetch(trelloListsURL), fetch(trelloCardsURL)]);
 
   const listsData = await listsResponse.json();
-  const cardsData = await cardsResponse.json();
+  let cardsData = await cardsResponse.json();
+  cardsData = cardsData.map(card => ({
+    ...card,
+    createdAt: trelloIdToDate(card.id)
+  }))
+
+const timeline = document.getElementById('timeline');
+
+cardsData.forEach(card => {
+  const el = document.createElement('div');
+  el.className = 'timeline-card';
+  el.innerHTML = `
+    <div>${card.createdAt.toLocaleString()}</div>
+    <h3>${card.name}</h3>
+    <p>${card.desc || ''}</p>
+  `;
+  timeline.appendChild(el);
+});
 
   const grouped = listsData.map(list => ({
     id: list.id,
@@ -66,3 +82,8 @@ form.addEventListener('submit', async (e) => {
 
   fetchN8NData(grouped)
 })
+
+const trelloIdToDate = (id) => {
+  const seconds = parseInt(id.substring(0, 8), 16);
+  return new Date(seconds * 1000);
+}
