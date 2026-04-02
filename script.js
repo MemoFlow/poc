@@ -31,7 +31,7 @@ const fetchN8NData = async (group) => {
     headers: {
       'Content-Type': 'application/json'
     },
-    body: group
+    body: JSON.stringify(group)
   })
 
   const n8nData = await n8nResponse.json();
